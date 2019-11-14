@@ -1,0 +1,106 @@
+
+
+---
+title: "Extraction of Telegram Data from JSON"
+author: "Kathryn Reynolds"
+---
+
+
+
+
+```{r Telegrams, message=FALSE}
+## Description: Analysis of Telegram Chat by Kathryn Reynolds (k.reynolds@cabi.org). This code was
+# adapted from code written by Aino Jarvelin (aino.jarvelin@bioch.ox.ac.uk) with help from Scott
+# from R4DS community office hours (@scottcame R4DS slack)
+## Date: 2019-11-13
+
+
+## requires rjson and tidyverse
+library(tidyverse)
+library(jsonlite)
+library(tinytex)
+
+
+###upload data####
+telegram <- jsonlite::fromJSON('~/result.json', simplifyDataFrame = FALSE,simplifyVector = FALSE)
+
+# there is only one "chats" object in the json, so we don't need to map over it. 
+#==> Get its child "list" and process each chat in the list
+
+tdf <- telegram$chats$list %>%
+  map_dfr(function(chat) {
+    
+    # process each chat
+    
+     chat_name       <- ifelse(is.null(chat$name), NA_character_, chat$name)
+     chat_type       <- chat$type
+     chat_id         <- chat$id
+    
+   # process the child list of messages within each chat
+      
+      map_dfr(chat$messages, function(message) {
+      
+   # process each message
+      
+      message_id    <- message$id
+      message_id    <- ifelse(is.null(message_id), NA_character_, message_id)
+      type          <- message$type
+      date          <- message$date
+      edited        <- message$edited
+      
+      # the following attributes are not always there in the message object, 
+      # ==> Need to convert them to NA if they are null
+      # (you cannot set a column on a tibble if the value is NULL)
+      
+      from          <- ifelse(is.null(message$from), NA_character_, message$from)
+      from_id       <- ifelse(is.null(message$from_id), NA_integer_, message$from_id)
+      reply_to_message_id <- ifelse(is.null(message$reply_to_message_id), NA_integer_, message$reply_to_message_id)
+      
+      
+      ####Action options
+       actor        <- ifelse( is.null(message$actor), NA_character_, message$actor)
+       actor.id     <- ifelse( is.null(message$actor_id), NA, message$actor_id)
+       action       <- ifelse( is.null(message$action),   NA, message$action)
+      
+      
+      ### Media Options#####
+      photo        <- ifelse(is.null(message$photo), NA_character_, message$photo)
+      photo_width  <- ifelse(is.null(message$width), NA_integer_, message$width)
+      photo_height <- ifelse(is.null(message$height), NA_integer_, message$height)
+      file         <- ifelse(is.null(message$file), NA_character_, message$file)
+      mime_type    <- ifelse(is.null(message$mime_type), NA_character_, message$mime_type)
+      thumbnail    <- ifelse( is.null(message$thumbnail),NA, message$thumbnail)
+      duration_s   <- ifelse( is.null(message$duration_seconds), NA,
+                              message$duration_seconds)
+      
+      
+      
+      
+      
+      
+      text <- message$text
+      
+      map_dfr(text, function(text) {
+        # process each text within the message; sometimes this is a list 
+        #(containing a text and a type), 
+        #other times it is just a character vector
+        if (is_list(text)) {
+          tibble(
+            chat_name, chat_type, chat_id, message_id, type, date, edited, from, from_id,
+            reply_to_message_id, actor, actor.id, action, photo, photo_width, photo_height, 
+            file, mime_type, thumbnail, duration_s, text=text$text
+          )
+        } else {
+          tibble(chat_name, chat_type, chat_id, message_id, type, date, edited, from, 
+                 from_id, reply_to_message_id, actor, actor.id, action,  photo, 
+                 photo_width, photo_height, file, mime_type, thumbnail, duration_s, text)
+        }
+      })
+      
+    })
+    
+  })
+
+
+```
+
