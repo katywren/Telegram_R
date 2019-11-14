@@ -9,9 +9,10 @@ author: "Kathryn Reynolds"
 
 
 ```{r Telegrams, message=FALSE}
-## Description: Analysis of Telegram Chat by Kathryn Reynolds (k.reynolds@cabi.org). This code was
-# adapted from code written by Aino Jarvelin (aino.jarvelin@bioch.ox.ac.uk) with help from Scott
-# from R4DS community office hours (@scottcame R4DS slack)
+## Description: Extraction of Telegram Chat data from raw JSON download using Telegram desktop
+#  by Kathryn Reynolds (k.reynolds@cabi.org). This code was adapted from code written by 
+#  Aino Jarvelin (aino.jarvelin@bioch.ox.ac.uk) with help from Scott from R4DS community office 
+#  hours (@scottcame R4DS slack)
 ## Date: 2019-11-13
 
 
