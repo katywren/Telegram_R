@@ -1,2 +1,2 @@
 # Telegram_R
-Code for the analysis of Telegram data in R
+Code for the extraction of Telegram data in R
